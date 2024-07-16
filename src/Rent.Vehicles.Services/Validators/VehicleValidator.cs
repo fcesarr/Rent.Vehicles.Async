@@ -37,6 +37,26 @@ public class VehicleValidator : Validator<Vehicle>, IVehicleValidator
                 }
 
                 return true;
-            }).WithMessage("Veiculo já alugado");
+            }).WithMessage("Veiculo esta alugado");
+        
+        RuleFor(x => x.RentCount)
+            .MustAsync(async (e, rentCount, cancellationToken) => {
+
+                var entity = await repository.GetAsync(x => x.Id == e.Id,
+                    cancellationToken: cancellationToken);
+                
+                if(entity is null)
+                    return true;
+
+                if((entity.IsRented != e.IsRented || entity.LicensePlate != e.LicensePlate) &&
+                    entity.RentCount <= rentCount)
+                    return true;
+
+                if(entity.RentCount > 0)
+                    return false;
+
+                return true;
+            })
+            .WithMessage("Veiculo possui alugueis cadastrados");
     }
 }

@@ -36,4 +36,6 @@ public class Vehicle : Entity
         get;
         set;
     } = false;
+
+    public int RentCount { get; set; }
 }

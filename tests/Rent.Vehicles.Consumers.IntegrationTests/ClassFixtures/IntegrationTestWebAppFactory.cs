@@ -1,9 +1,12 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
+using Rent.Vehicles.Api;
 using Rent.Vehicles.Consumers.IntegrationTests.Extensions.DependencyInjection;
 using Rent.Vehicles.Entities;
 using Rent.Vehicles.Entities.Factories.Interfaces;
@@ -52,11 +55,13 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         await connection.OpenAsync();
 
         await context.Database.EnsureDeletedAsync();
+
+        await DisposeAsync();
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder
+        builder = builder
             .UseEnvironment("Tests")
             .UseContentRoot(Directory.GetCurrentDirectory())
             .ConfigureAppConfiguration((context, config) =>

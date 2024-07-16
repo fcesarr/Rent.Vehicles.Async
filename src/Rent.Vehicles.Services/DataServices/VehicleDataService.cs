@@ -26,6 +26,7 @@ public class VehicleDataService : DataService<Vehicle>, IVehicleDataService
         }
 
         entity.Value!.IsRented = true;
+        entity.Value!.RentCount++;
 
         return await UpdateAsync(entity.Value!, cancellationToken);
     }

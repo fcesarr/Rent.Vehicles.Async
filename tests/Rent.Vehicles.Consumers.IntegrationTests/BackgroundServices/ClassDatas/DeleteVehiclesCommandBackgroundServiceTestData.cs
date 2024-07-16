@@ -25,6 +25,7 @@ public class DeleteVehiclesCommandBackgroundServiceTestData : IEnumerable<object
         {
             var entity = _fixture.Build<Vehicle>()
                 .With(x => x.IsRented, false)
+                .With(x => x.RentCount, 0)
                 .Create();
 
             return new object[]
@@ -42,6 +43,7 @@ public class DeleteVehiclesCommandBackgroundServiceTestData : IEnumerable<object
         {
             var entity = _fixture.Build<Vehicle>()
                 .With(x => x.IsRented, true)
+                .With(x => x.RentCount, 1)
                 .Create();
 
             return new object[]
@@ -53,17 +55,13 @@ public class DeleteVehiclesCommandBackgroundServiceTestData : IEnumerable<object
         yield return new Func<object[]>(() =>
         {
             var entity = _fixture.Build<Vehicle>()
-                .With(x => x.IsRented, true)
-                .Create();
-            
-            var rent = _fixture.Build<Entities.Rent>()
-                    .With(x => x.VehicleId, entity.Id)
-                    .Without(x => x.Vehicle)
+                .With(x => x.IsRented, false)
+                .With(x => x.RentCount, 1)
                 .Create();
 
             return new object[]
             {
-                new[] { Tuple.Create(nameof(DeleteVehiclesEvent), StatusType.Fail) }, HttpStatusCode.OK, new Entity[] { entity, rent },
+                new[] { Tuple.Create(nameof(DeleteVehiclesEvent), StatusType.Fail) }, HttpStatusCode.OK, new[] { entity },
                 $"/api/vehicle/{entity.Id.ToString()}", $"/api/vehicle/{entity.LicensePlate}"
             };
         })();

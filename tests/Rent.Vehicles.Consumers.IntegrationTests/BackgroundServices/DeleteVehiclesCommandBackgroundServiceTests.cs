@@ -53,7 +53,7 @@ public class DeleteVehiclesCommandBackgroundServiceTests : IAsyncLifetime
     }
 
     [Theory(DisplayName =
-        $"{nameof(CreateVehiclesCommandBackgroundServiceTests)}.{nameof(SendDeleteVehiclesCommandVerifyEventStatusAndStatusCode)}")]
+        $"{nameof(DeleteVehiclesCommandBackgroundServiceTests)}.{nameof(SendDeleteVehiclesCommandVerifyEventStatusAndStatusCode)}")]
     [ClassData(typeof(DeleteVehiclesCommandBackgroundServiceTestData))]
     public async Task SendDeleteVehiclesCommandVerifyEventStatusAndStatusCode(Tuple<string, StatusType>[] tuples,
         HttpStatusCode statusCode,

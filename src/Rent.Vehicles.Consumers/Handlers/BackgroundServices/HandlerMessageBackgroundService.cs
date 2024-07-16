@@ -13,7 +13,7 @@ namespace Rent.Vehicles.Consumers.Handlers.BackgroundServices;
 public abstract class HandlerMessageBackgroundService<TEventToConsume> : BackgroundService
     where TEventToConsume : Message
 {
-    protected readonly IConsumer _channel;
+    protected readonly IConsumer _consumer;
 
     private readonly ConsumerSetting _consumerSetting;
 
@@ -38,7 +38,7 @@ public abstract class HandlerMessageBackgroundService<TEventToConsume> : Backgro
         IOptions<ConsumerSetting> consumerSetting)
     {
         _logger = logger;
-        _channel = channel;
+        _consumer = channel;
         _periodicTimer = periodicTimer;
         _serializer = serializer;
         _consumerSetting = consumerSetting.Value;
@@ -65,7 +65,7 @@ public abstract class HandlerMessageBackgroundService<TEventToConsume> : Backgro
             return;
         }
 
-        await _channel.SubscribeAsync(_queueName, cancellationToken);
+        await _consumer.SubscribeAsync(_queueName, cancellationToken);
 
         _logger.LogInformation("StartAsync {ClassName}: {Guid}", GetType().Name, _guid);
 
@@ -88,7 +88,7 @@ public abstract class HandlerMessageBackgroundService<TEventToConsume> : Backgro
             ConsumerResponse? consumerResponse = default;
             try
             {
-                consumerResponse = await _channel.ConsumeAsync(cancellationToken);
+                consumerResponse = await _consumer.ConsumeAsync(cancellationToken);
 
                 if (consumerResponse == null)
                 {
@@ -124,7 +124,7 @@ public abstract class HandlerMessageBackgroundService<TEventToConsume> : Backgro
                     continue;
                 }
 
-                await _channel.AckAsync(consumerResponse.Id, cancellationToken);
+                await _consumer.AckAsync(consumerResponse.Id, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -142,7 +142,7 @@ public abstract class HandlerMessageBackgroundService<TEventToConsume> : Backgro
     {
         if (consumerResponse is not null)
         {
-            await _channel.RemoveAsync(consumerResponse.Id, cancellationToken);
+            await _consumer.RemoveAsync(consumerResponse.Id, cancellationToken);
         }
 
         _logger.LogError(exception, "{ClassName} encountered an error: {ErrorMessage}", GetType().Name,
@@ -168,7 +168,7 @@ public abstract class HandlerMessageBackgroundService<TEventToConsume> : Backgro
             return;
         }
 
-        await _channel.RemoveAsync(consumerResponse.Id, cancellationToken);
+        await _consumer.RemoveAsync(consumerResponse.Id, cancellationToken);
     }
 
     protected virtual async Task<Result<Task>> HandlerAsync(TEventToConsume message,

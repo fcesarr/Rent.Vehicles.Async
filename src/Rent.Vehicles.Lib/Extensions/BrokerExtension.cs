@@ -33,8 +33,7 @@ public static class BrokerExtension
                 {
                     Uri = new Uri(connectionString),
                     DispatchConsumersAsync = true,
-                    ConsumerDispatchConcurrency = 100,
-                    UseBackgroundThreadsForIO = false
+                    ConsumerDispatchConcurrency = 100
                 };
 
                 return factory.CreateConnection();

@@ -7,7 +7,7 @@ using Rent.Vehicles.Lib.Responses;
 
 namespace Rent.Vehicles.Lib;
 
-public class AmqpConsumer : IConsumer
+public class AmqpConsumer : IConsumer, IAsyncDisposable
 {
     private readonly ILogger<AmqpConsumer> _logger;
     private readonly ISession _session;
@@ -20,9 +20,9 @@ public class AmqpConsumer : IConsumer
         _session = session;
     }
 
-    public Task AckAsync(dynamic id, CancellationToken cancellationToken = default)
+    public async Task AckAsync(dynamic id, CancellationToken cancellationToken = default)
     {
-        return Task.Run(() =>
+        await Task.Run(() =>
         {
             if (_receiverLink is null)
             {
@@ -42,6 +42,12 @@ public class AmqpConsumer : IConsumer
 
         try
         {
+            if(cancellationToken.IsCancellationRequested)
+                return null;
+
+            if(_receiverLink.IsClosed)
+                return null;
+
             var receivedMessage = await _receiverLink.ReceiveAsync();
     
             if (receivedMessage == null)
@@ -68,9 +74,9 @@ public class AmqpConsumer : IConsumer
         }
     }
 
-    public Task RemoveAsync(dynamic id, CancellationToken cancellationToken = default)
+    public async Task RemoveAsync(dynamic id, CancellationToken cancellationToken = default)
     {
-        return Task.Run(() =>
+        await Task.Run(() =>
         {
             if (_receiverLink is null)
             {
@@ -81,11 +87,26 @@ public class AmqpConsumer : IConsumer
         }, cancellationToken);
     }
 
-    public Task SubscribeAsync(string name, CancellationToken cancellationToken = default)
+    public async Task SubscribeAsync(string name, CancellationToken cancellationToken = default)
     {
-        return Task.Run(() =>
+        await Task.Run(() =>
         {
             _receiverLink = _session.CreateReceiver(Guid.NewGuid().ToString(), name);
         }, cancellationToken);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_receiverLink is null)
+        {
+            return;
+        }
+
+        if(_receiverLink.IsClosed)
+            return;
+
+        await _receiverLink.CloseAsync();
+
+        GC.SuppressFinalize(this);
     }
 }

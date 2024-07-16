@@ -36,9 +36,12 @@ public class DeleteVehiclesProjectionEventBackgroundService : HandlerEventServic
 
         if (!entity.IsSuccess)
         {
+            _logger.LogError(entity.Exception, "Aqui Projection");
             return entity.Exception!;
         }
 
+
+        _logger.LogInformation("Aqui Projection");
         return Task.CompletedTask;
     }
 }

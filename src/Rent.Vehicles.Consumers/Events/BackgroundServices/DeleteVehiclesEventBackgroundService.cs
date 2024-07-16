@@ -46,9 +46,11 @@ public class DeleteVehiclesEventBackgroundService : HandlerEventServicePublishEv
 
         if (!entity.IsSuccess)
         {
+            _logger.LogError(entity.Exception, "Aqui Event");
             return entity.Exception!;
         }
 
+        _logger.LogInformation("Aqui Event");
         return Task.CompletedTask;
     }
 }
